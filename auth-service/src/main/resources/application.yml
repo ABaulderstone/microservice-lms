@@ -3,6 +3,8 @@ spring:
     name: auth-service
   datasource:
     driver-class-name: org.postgresql.Driver
+  profiles:
+    active: dev
 
   jpa:
     open-in-view: false
