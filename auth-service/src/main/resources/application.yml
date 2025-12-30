@@ -17,3 +17,8 @@ grpc:
     port: 9090
     security:
       enabled: false
+
+app:
+  jwt:
+    secret: MySuperSecretKey1234567890ABCBACABCdef4567890123456789012345678901234567890
+    expiration-ms: 86400000

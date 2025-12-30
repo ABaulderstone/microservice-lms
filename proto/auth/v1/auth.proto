@@ -10,6 +10,7 @@ option java_outer_classname = "AuthProto";
 service AuthService {
   // Login authenticates a user with their username and password.
   rpc Login (LoginRequest) returns (LoginResponse);
+  rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
 }
 
 message LoginRequest {
@@ -18,6 +19,13 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  bool success = 1;
-  string message = 2;
+  string token = 1;
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+} 
+
+message ValidateTokenResponse {
+  bool valid = 1;
 }
