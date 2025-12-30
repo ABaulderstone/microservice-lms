@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -8,36 +7,28 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.5</version>
+		<version>3.3.4</version>
 		<relativePath />
 	</parent>
 
 	<groupId>com.example</groupId>
 	<artifactId>auth-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>auth-service</name>
 
 	<properties>
 		<java.version>17</java.version>
-
-		<!-- gRPC + Protobuf -->
-		<grpc.version>1.78.0</grpc.version>
-		<protobuf.version>4.33.2</protobuf.version>
-		<grpc.spring.version>3.1.0.RELEASE</grpc.spring.version>
+		<grpc.version>1.62.2</grpc.version>
+		<protobuf.version>3.25.3</protobuf.version>
+		<spring-grpc.version>2.15.0.RELEASE</spring-grpc.version>
 	</properties>
 
-	<!-- ===================== -->
-	<!-- Dependencies -->
-	<!-- ===================== -->
 	<dependencies>
-
 		<!-- Spring Boot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 
-		<!-- JPA -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -47,77 +38,69 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.7.8</version>
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- ===================== -->
-		<!-- gRPC (net.devh) -->
-		<!-- ===================== -->
-
-		<!-- gRPC Server -->
+		<!-- gRPC -->
 		<dependency>
 			<groupId>net.devh</groupId>
 			<artifactId>grpc-server-spring-boot-starter</artifactId>
-			<version>${grpc.spring.version}</version>
+			<version>${spring-grpc.version}</version>
 		</dependency>
 
-		<!-- gRPC Client -->
+		<!-- JWT -->
 		<dependency>
-			<groupId>net.devh</groupId>
-			<artifactId>grpc-client-spring-boot-starter</artifactId>
-			<version>${grpc.spring.version}</version>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.5</version>
 		</dependency>
-
-		<!-- gRPC runtime -->
 		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-netty-shaded</artifactId>
-			<version>${grpc.version}</version>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
 		</dependency>
-
 		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-protobuf</artifactId>
-			<version>${grpc.version}</version>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
 		</dependency>
 
+		<!-- javax.annotation (for gRPC stubs) -->
 		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-stub</artifactId>
-			<version>${grpc.version}</version>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+			<version>2.1.1</version>
 		</dependency>
 
-		<!-- Needed for Java 9+ -->
 		<dependency>
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
 			<version>1.3.2</version>
 		</dependency>
 
-		<!-- Dev -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-
-		<!-- Test -->
+		<!-- Testing -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.devh</groupId>
+			<artifactId>grpc-client-spring-boot-starter</artifactId>
+			<version>${spring-grpc.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
-	<!-- ===================== -->
-	<!-- Build -->
-	<!-- ===================== -->
 	<build>
 		<extensions>
-			<!-- Detect OS for protoc -->
 			<extension>
 				<groupId>kr.motd.maven</groupId>
 				<artifactId>os-maven-plugin</artifactId>
@@ -126,29 +109,30 @@
 		</extensions>
 
 		<plugins>
+			<!-- Spring Boot -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
 
-			<!-- Protobuf + gRPC codegen -->
+			<!-- Protobuf -->
 			<plugin>
 				<groupId>org.xolstice.maven.plugins</groupId>
 				<artifactId>protobuf-maven-plugin</artifactId>
 				<version>0.6.1</version>
-
 				<configuration>
-					<!-- This matches the Dockerfile COPY -->
-					<protoSourceRoot>${project.basedir}/proto</protoSourceRoot>
-
 					<protocArtifact>
 						com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}
 					</protocArtifact>
-
 					<pluginId>grpc-java</pluginId>
 					<pluginArtifact>
 						io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
 					</pluginArtifact>
+					<protoSourceRoot>${proto.dir}</protoSourceRoot>
 				</configuration>
-
 				<executions>
 					<execution>
+						<id>compile</id>
 						<goals>
 							<goal>compile</goal>
 							<goal>compile-custom</goal>
@@ -156,14 +140,28 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<!-- Spring Boot -->
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-
 		</plugins>
 	</build>
+
+	<profiles>
+		<!-- IDE profile -->
+		<profile>
+			<id>ide</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<proto.dir>${project.basedir}/../proto</proto.dir>
+			</properties>
+		</profile>
+
+		<!-- Docker profile -->
+		<profile>
+			<id>docker</id>
+			<properties>
+				<proto.dir>${project.basedir}/proto</proto.dir>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>

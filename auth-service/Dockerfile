@@ -5,25 +5,28 @@ FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 WORKDIR /build
 
-# Copy Maven config first (better caching)
-COPY pom.xml .
-COPY src ./src
+RUN ls -la
+# Copy pom.xml first (better caching)
+COPY auth-service/pom.xml ./pom.xml
 
-# Copy shared proto files into the service
-COPY ../../proto ./proto
+# Copy source code
+COPY auth-service/src ./src
 
-# Build the application (includes protobuf + gRPC codegen)
-RUN mvn clean package -DskipTests
+# Copy shared proto files
+COPY proto ./proto
+
+# Build (includes protobuf + gRPC codegen)
+RUN mvn clean package -DskipTests -Pdocker
 
 
 # =========================
 # Runtime stage
 # =========================
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
-COPY --from=build /build/target/auth-service.jar app.jar
+COPY --from=build /build/target/auth-service-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 9090
 

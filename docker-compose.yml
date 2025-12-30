@@ -20,7 +20,8 @@ services:
 
   auth-service:
     build:
-      context: ./services/auth-service
+      context: .
+      dockerfile: auth-service/Dockerfile
     container_name: auth-service
     depends_on:
       postgres:
