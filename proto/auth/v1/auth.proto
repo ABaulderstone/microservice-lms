@@ -6,7 +6,9 @@ option java_multiple_files = true;
 option java_package = "com.example.auth.proto.v1";
 option java_outer_classname = "AuthProto";
 
+// AuthService provides authentication operations for users.
 service AuthService {
+  // Login authenticates a user with their username and password.
   rpc Login (LoginRequest) returns (LoginResponse);
 }
 
