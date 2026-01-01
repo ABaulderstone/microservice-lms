@@ -53,6 +53,7 @@ public class AuthGrpcService extends AuthServiceGrpc.AuthServiceImplBase {
                         responseObserver
                                         .onError(Status.UNAUTHENTICATED.withDescription("Email or password invalid")
                                                         .asRuntimeException());
+
                 }
 
                 String token = jwtService.generateToken(foundUser);
