@@ -39,9 +39,8 @@ public class AuthGrpcService extends AuthServiceGrpc.AuthServiceImplBase {
                 User foundUser = userService.findByEmail(email).orElse(null);
 
                 if (foundUser == null) {
-                        responseObserver
-                                        .onError(Status.UNAUTHENTICATED.withDescription("Email or password invalid")
-                                                        .asRuntimeException());
+                        responseObserver.onError(Status.UNAUTHENTICATED.withDescription("Email or password invalid")
+                                        .asRuntimeException());
                         return;
                 }
 
@@ -50,10 +49,9 @@ public class AuthGrpcService extends AuthServiceGrpc.AuthServiceImplBase {
                                 foundUser.getPassword());
 
                 if (!passwordMatches) {
-                        responseObserver
-                                        .onError(Status.UNAUTHENTICATED.withDescription("Email or password invalid")
-                                                        .asRuntimeException());
-
+                        responseObserver.onError(Status.UNAUTHENTICATED.withDescription("Email or password invalid")
+                                        .asRuntimeException());
+                        return;
                 }
 
                 String token = jwtService.generateToken(foundUser);
@@ -61,6 +59,7 @@ public class AuthGrpcService extends AuthServiceGrpc.AuthServiceImplBase {
                 LoginResponse response = LoginResponse.newBuilder()
                                 .setToken(token)
                                 .build();
+
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
 

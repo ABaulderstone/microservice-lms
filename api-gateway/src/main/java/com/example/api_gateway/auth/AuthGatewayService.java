@@ -1,9 +1,13 @@
 package com.example.api_gateway.auth;
 
 import com.example.api_gateway.auth.dtos.LoginRequestDto;
+import com.example.api_gateway.common.GrpcExceptionMapper;
 import com.example.auth.proto.v1.AuthServiceGrpc;
 import com.example.auth.proto.v1.LoginRequest;
 import com.example.auth.proto.v1.LoginResponse;
+
+import io.grpc.StatusRuntimeException;
+
 import java.util.Map;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
@@ -23,8 +27,10 @@ public class AuthGatewayService {
 
             LoginResponse grpcResponse = authServiceStub.login(grpcRequest);
             return Map.of("token", grpcResponse.getToken());
+        } catch (StatusRuntimeException e) {
+            throw GrpcExceptionMapper.toHttpException(e);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to login user", e);
+            throw new RuntimeException("Unexpected error during login", e);
         }
     }
 }
