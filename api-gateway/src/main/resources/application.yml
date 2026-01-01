@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: api-gateway
+server:
+  port: 8080
+
+grpc:
+  client:
+    auth-service:
+      address: static://auth-service:9090
+      negotiationType: plaintext
+
+app:
+  jwt:
+    secret: MySuperSecretKey1234567890ABCBACABCdef4567890123456789012345678901234567890

@@ -7,10 +7,10 @@ WORKDIR /build
 
 RUN ls -la
 # Copy pom.xml first (better caching)
-COPY auth-service/pom.xml ./pom.xml
+COPY api-gateway/pom.xml ./pom.xml
 
 # Copy source code
-COPY auth-service/src ./src
+COPY api-gateway/src ./src
 
 # Copy shared proto files
 COPY proto ./proto
@@ -26,8 +26,8 @@ FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
-COPY --from=build /build/target/auth-service-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /build/target/api-gateway-0.0.1-SNAPSHOT.jar app.jar
 
-EXPOSE 9090
+EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
