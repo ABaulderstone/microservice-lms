@@ -15,9 +15,10 @@ public class JwtService {
     private String secretKey;
 
     public Claims parseToken(String token) {
-        return (Claims) Jwts.parserBuilder()
+        var parser = Jwts.parserBuilder()
                 .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
                 .build()
                 .parseClaimsJws(token);
+        return parser.getBody();
     }
 }
