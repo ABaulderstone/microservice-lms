@@ -1,4 +1,4 @@
-package com.example.auth_service.jwt;
+package com.example.auth_service.auth;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -31,22 +31,12 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
-        try {
-            Jws<Claims> claims = parseToken(token);
-            Date expiration = claims.getBody().getExpiration();
-            return expiration.after(new Date());
-        } catch (Exception e) {
-            System.out.println("Token validation error: " + e.getMessage());
-            return false;
-        }
-    }
-
-    private Jws<Claims> parseToken(String token) {
-        return Jwts.parserBuilder()
+    public Claims parseToken(String token) {
+        var parser = Jwts.parserBuilder()
                 .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
                 .build()
                 .parseClaimsJws(token);
+        return parser.getBody();
     }
 
 }

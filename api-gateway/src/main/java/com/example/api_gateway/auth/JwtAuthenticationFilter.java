@@ -37,10 +37,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Claims claims = jwtService.parseToken(token);
                 Authentication auth = new UsernamePasswordAuthenticationToken(claims.getSubject(), null, List.of());
                 SecurityContextHolder.getContext().setAuthentication(auth);
+                request.setAttribute("jwt", token);
             }
             filterChain.doFilter(request, response);
             return;
         } catch (JwtException e) {
+            System.out.println("JWT processing error: " + e.getMessage());
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Token", e);
         } catch (Exception e) {
             throw new ServletException("Failed to process JWT authentication", e);

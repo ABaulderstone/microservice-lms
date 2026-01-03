@@ -5,8 +5,8 @@ import com.example.auth.proto.v1.LoginRequest;
 import com.example.auth.proto.v1.LoginResponse;
 import com.example.auth.proto.v1.ValidateTokenRequest;
 import com.example.auth.proto.v1.ValidateTokenResponse;
+import com.example.auth_service.auth.JwtService;
 import com.example.auth_service.auth.PasswordEncodingService;
-import com.example.auth_service.jwt.JwtService;
 import com.example.auth_service.user.UserService;
 import com.example.auth_service.user.entities.User;
 
@@ -65,17 +65,4 @@ public class AuthGrpcService extends AuthServiceGrpc.AuthServiceImplBase {
 
         }
 
-        @Override
-        public void validateToken(
-                        ValidateTokenRequest request,
-                        StreamObserver<ValidateTokenResponse> responseObserver) {
-
-                String token = request.getToken();
-                boolean isValid = jwtService.validateToken(token);
-                ValidateTokenResponse response = ValidateTokenResponse.newBuilder()
-                                .setValid(isValid)
-                                .build();
-                responseObserver.onNext(response);
-                responseObserver.onCompleted();
-        }
 }
