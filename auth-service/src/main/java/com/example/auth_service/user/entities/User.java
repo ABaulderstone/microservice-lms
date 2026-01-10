@@ -68,9 +68,7 @@ public class User {
         this.password = password;
     }
 
-    public void setRoles(Set<Role>[] roles2) {
-        for (Set<Role> rolesSet : roles2) {
-            this.roles.addAll(rolesSet);
-        }
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 }

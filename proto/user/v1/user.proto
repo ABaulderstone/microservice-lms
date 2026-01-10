@@ -10,10 +10,17 @@ option java_outer_classname = "UserProto";
 service UserService {
   // FindUser retrieves a user by their ID.
   rpc FindUser (UserRequest) returns (UserResponse);
+  // CreateUser creates a new user with the provided details
+  rpc CreateUser (CreateUserRequest) returns (UserResponse);
 }
 
 message UserRequest {
   int64 user_id = 1;
+}
+
+message CreateUserRequest {
+  string email = 1;
+  repeated string roles = 2;
 }
 
 message UserResponse {

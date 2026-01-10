@@ -1,3 +1,14 @@
+error id: file://<WORKSPACE>/api-gateway/src/main/java/com/example/api_gateway/user/UserController.java:_empty_/ResponseStatusException#
+file://<WORKSPACE>/api-gateway/src/main/java/com/example/api_gateway/user/UserController.java
+empty definition using pc, found symbol in pc: _empty_/ResponseStatusException#
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 1402
+uri: file://<WORKSPACE>/api-gateway/src/main/java/com/example/api_gateway/user/UserController.java
+text:
+```scala
 package com.example.api_gateway.user;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +44,7 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ADMIN', 'COACH', 'TALENT')")
     public ResponseEntity<UserResponseDto> findUserById(@PathVariable Long id) {
         UserResponse userResp = userGatewayService.findById(id).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID " + id + " not found"));
+                () -> new R@@esponseStatusException(HttpStatus.NOT_FOUND, "User with ID " + id + " not found"));
         return ResponseEntity.ok(UserResponseDto.fromProto(userResp));
     }
 
@@ -45,3 +56,10 @@ public class UserController {
     }
 
 }
+
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: _empty_/ResponseStatusException#

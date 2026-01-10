@@ -1,3 +1,14 @@
+error id: file://<WORKSPACE>/auth-service/src/main/java/com/example/auth_service/user/UserService.java:_empty_/User#setRoles#
+file://<WORKSPACE>/auth-service/src/main/java/com/example/auth_service/user/UserService.java
+empty definition using pc, found symbol in pc: _empty_/User#setRoles#
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 981
+uri: file://<WORKSPACE>/auth-service/src/main/java/com/example/auth_service/user/UserService.java
+text:
+```scala
 package com.example.auth_service.user;
 
 import java.util.Optional;
@@ -19,12 +30,12 @@ public class UserService {
         this.passwordEncodingService = passwordEncodingService;
     }
 
-    public User createUser(String email, String rawPassword, Set<Role> roles) {
+    public User createUser(String email, String rawPassword, Set<Role>...roles) {
         String hashedPassword = passwordEncodingService.hashPassword(rawPassword);
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setPassword(hashedPassword);
-        newUser.setRoles(roles);
+        newUser.setRole@@s(roles);
         return userRepository.save(newUser);
     }
 
@@ -37,3 +48,10 @@ public class UserService {
     }
 
 }
+
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: _empty_/User#setRoles#

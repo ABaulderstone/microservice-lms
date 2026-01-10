@@ -1,7 +1,17 @@
+error id: file://<WORKSPACE>/auth-service/src/main/java/com/example/auth_service/user/grpc/UserGrpcService.java:
+file://<WORKSPACE>/auth-service/src/main/java/com/example/auth_service/user/grpc/UserGrpcService.java
+empty definition using pc, found symbol in pc: 
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+
+offset: 2034
+uri: file://<WORKSPACE>/auth-service/src/main/java/com/example/auth_service/user/grpc/UserGrpcService.java
+text:
+```scala
 package com.example.auth_service.user.grpc;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.example.auth_service.common.decorators.RequireAnyRole;
 import com.example.auth_service.user.UserService;
@@ -47,40 +57,31 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    @Override
-    @RequireAnyRole({ "ADMIN" })
-    public void createUser(com.example.user.proto.v1.CreateUserRequest request,
-            StreamObserver<UserResponse> responseObserver) {
-        String email = request.getEmail();
-        String password = "password123"; // Default password, should be changed later
-        var roles = request.getRolesList(); // Assuming roles are sent as a list of strings
-        Set<Role> roleSet = roles.stream()
-                .map(roleName -> {
-                    try {
-                        return Role.RoleName.valueOf(roleName);
-                    } catch (IllegalArgumentException e) {
-                        return null;
-                    }
-                })
-                .filter(roleName -> roleName != null)
-                .map(roleName -> {
-                    var role = new Role();
-                    role.setName(roleName);
-                    return role;
-                })
-                .collect(Collectors.toSet());
-
-        User newUser = userService.createUser(email, password, roleSet);
-
-        UserResponse response = UserResponse.newBuilder()
-                .setId(newUser.getId())
-                .setEmail(newUser.getEmail())
-                .addAllRoles(newUser.getRoles().stream()
-                        .map(role -> role.getName().name())
-                        .toList())
-                .build();
-
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-    }
+@Override
+@RequireAnyRole({ "ADMIN" })
+public void createUser(com.example.user.proto.v1.CreateUserRequest request, StreamObserver<UserResponse> responseObserver) {
+    String email = request.getEmail();
+    var roles = request.getRolesList(); // Assuming roles are sent as a list of strings
+    Set<Role> roleSet = roles.stream()
+            .map(Role::@@valueOf)
+            .collect(Collectors.toSet());
+    User newUser = userService.createUser(email, roleSet);
+    
+    UserResponse response = UserResponse.newBuilder()
+            .setId(newUser.getId())
+            .setEmail(newUser.getEmail())
+            .addAllRoles(newUser.getRoles().stream()
+                    .map(role -> role.getName().name())
+                    .toList())
+            .build();
+    
+    responseObserver.onNext(response);
+    responseObserver.onCompleted();
 }
+
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: 
