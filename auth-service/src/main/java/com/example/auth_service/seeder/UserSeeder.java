@@ -21,12 +21,13 @@ public class UserSeeder implements CommandLineRunner {
         this.roleRepository = roleRepository;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void run(String... args) throws Exception {
         System.out.println("Seeding roles...");
         if (this.roleRepository.count() == 0) {
             for (var roleName : Role.RoleName.values()) {
-                var role = new com.example.auth_service.user.entities.Role();
+                var role = new Role();
                 role.setName(roleName);
                 roleRepository.save(role);
             }
@@ -34,8 +35,12 @@ public class UserSeeder implements CommandLineRunner {
         }
         System.out.println("Seeding default users...");
         if (userService.findByEmail("admin@test.com").isEmpty()) {
-            userService.createUser("admin@test.com", "password",
-                    Set.of(roleRepository.findByName(Role.RoleName.ADMIN).get()));
+            for (var roleName : Role.RoleName.values()) {
+                var email = roleName.name().toLowerCase() + "@test.com";
+                var password = "password";
+                var roles = Set.of(roleRepository.findByName(roleName).get());
+                userService.createUser(email, password, roles);
+            }
         }
     }
 }
