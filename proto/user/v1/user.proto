@@ -19,4 +19,5 @@ message UserRequest {
 message UserResponse {
   int64 id = 1;
   string email = 2;
+  repeated string roles = 3;
 }

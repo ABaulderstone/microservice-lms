@@ -1,10 +1,17 @@
 package com.example.auth_service.user.entities;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -18,6 +25,10 @@ public class User {
     private String email;
     @Column(nullable = false)
     private String password;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
 
     // Constructors
     public User() {
@@ -41,6 +52,10 @@ public class User {
         return email;
     }
 
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
     public void setEmail(String email) {
         this.email = email;
     }
@@ -51,5 +66,11 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setRoles(Set<Role>[] roles2) {
+        for (Set<Role> rolesSet : roles2) {
+            this.roles.addAll(rolesSet);
+        }
     }
 }

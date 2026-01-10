@@ -1,5 +1,6 @@
 package com.example.auth_service.user.grpc;
 
+import com.example.auth_service.common.decorators.RequireAnyRole;
 import com.example.auth_service.user.UserService;
 import com.example.auth_service.user.entities.User;
 import com.example.user.proto.v1.UserRequest;
@@ -19,6 +20,7 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
     }
 
     @Override
+    @RequireAnyRole({ "TALENT", "ADMIN" })
     public void findUser(UserRequest request, StreamObserver<UserResponse> responseObserver) {
         long userId = request.getUserId();
         User foundUser = userService.findById(userId).orElse(null);
@@ -32,6 +34,9 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
         UserResponse response = UserResponse.newBuilder()
                 .setId(foundUser.getId())
                 .setEmail(foundUser.getEmail())
+                .addAllRoles(foundUser.getRoles().stream()
+                        .map(role -> role.getName().name())
+                        .toList())
                 .build();
 
         responseObserver.onNext(response);

@@ -1,0 +1,14 @@
+package com.example.auth_service.common;
+
+import io.grpc.Metadata;
+
+public class GrpcAuthConstants {
+        public static final String AUTH_SERVICE_NAME = "auth-service";
+        public static final Metadata.Key<String> AUTH_TOKEN_METADATA_KEY = Metadata.Key.of("authorization",
+                        Metadata.ASCII_STRING_MARSHALLER);
+        public static final Metadata.Key<String> USER_ID = Metadata.Key.of("x-user-id",
+                        Metadata.ASCII_STRING_MARSHALLER);
+
+        public static final Metadata.Key<String> USER_ROLES = Metadata.Key.of("x-user-roles",
+                        Metadata.ASCII_STRING_MARSHALLER);
+}

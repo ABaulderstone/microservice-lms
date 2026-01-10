@@ -1,10 +1,12 @@
 package com.example.auth_service.user;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
 import com.example.auth_service.auth.PasswordEncodingService;
+import com.example.auth_service.user.entities.Role;
 import com.example.auth_service.user.entities.User;
 
 @Service
@@ -17,11 +19,12 @@ public class UserService {
         this.passwordEncodingService = passwordEncodingService;
     }
 
-    public User createUser(String email, String rawPassword) {
+    public User createUser(String email, String rawPassword, Set<Role>... roles) {
         String hashedPassword = passwordEncodingService.hashPassword(rawPassword);
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setPassword(hashedPassword);
+        newUser.setRoles(roles);
         return userRepository.save(newUser);
     }
 
