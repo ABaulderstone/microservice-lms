@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.api_gateway.auth.RequireRoles;
 import com.example.api_gateway.user.dtos.CreateUserDto;
 import com.example.api_gateway.user.dtos.UserResponseDto;
 import com.example.user.proto.v1.UserResponse;
@@ -30,14 +31,14 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'COACH', 'TALENT')")
+    @RequireRoles({ "ADMIN", "COACH", "TALENT" })
     public ResponseEntity<UserResponseDto> findUserById(@PathVariable Long id) {
         UserResponse userResp = userGatewayService.findById(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID " + id + " not found"));
         return ResponseEntity.ok(UserResponseDto.fromProto(userResp));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'COACH', 'TALENT')")
+    @RequireRoles({ "ADMIN" })
     @PostMapping()
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody CreateUserDto data) {
         UserResponse createdUserResp = userGatewayService.createUser(data);

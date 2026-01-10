@@ -11,8 +11,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.api_gateway.auth.JwtAuthenticationFilter;
-import com.example.api_gateway.common.RestAuthenticationEntryPoint;
-import com.example.api_gateway.common.RestAccessDeniedHandler;
+import com.example.api_gateway.auth.RestAccessDeniedHandler;
+import com.example.api_gateway.auth.RestAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
