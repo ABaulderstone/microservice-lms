@@ -1,6 +1,7 @@
 package com.example.api_gateway.auth;
 
 import java.io.IOException;
+import java.security.Security;
 import java.util.List;
 
 import org.checkerframework.checker.units.qual.C;
@@ -36,22 +37,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = extractToken(request);
             if (token != null) {
                 Claims claims = jwtService.parseToken(token);
-                
+
                 @SuppressWarnings("unchecked")
                 List<String> roleNames = (List<String>) claims.get("roles", List.class);
-                
+
                 var roles = roleNames.stream()
                         .map(roleName -> (GrantedAuthority) () -> "ROLE_" + roleName)
                         .toList();
 
                 Authentication auth = new UsernamePasswordAuthenticationToken(claims.getSubject(), null, roles);
+                System.out.println("AFTER FILTER → auth = " + auth);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
             filterChain.doFilter(request, response);
             return;
         } catch (JwtException e) {
-            System.out.println("JWT processing error: " + e.getMessage());
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Token", e);
+            SecurityContextHolder.clearContext();
         } catch (Exception e) {
             throw new ServletException("Failed to process JWT authentication", e);
         }

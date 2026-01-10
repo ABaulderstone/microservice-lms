@@ -37,6 +37,7 @@ public class UserController {
         return ResponseEntity.ok(UserResponseDto.fromProto(userResp));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'COACH', 'TALENT')")
     @PostMapping()
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody CreateUserDto data) {
         UserResponse createdUserResp = userGatewayService.createUser(data);
