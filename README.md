@@ -63,7 +63,7 @@ public class SecurityConfig {
 ```
 
 - Spring Security was built with an MVC/ server html rendered pattern in mind and by default uses a session. You need to explicitly turn that off
-</hr>
+  ***
 - If (like me) you are a control freak you might want to build your own `entry points` or handlers for the 401 and 403 errors that can be thrown by unauthenticated requests or requests without the right permissions to perform an action. It's a bit of a drag but you can create them and inject them into the Security Filter chain with a bit of Spring dependency injection magic. Trying to throw `ResponseStatusException` (which feels like the correct thing to do particular if you're coming from another framework) results in those exceptions getting swallowed and getting a 500 internal server error back, it's pretty opaque.
 - These entrypoints look like this
 
@@ -91,9 +91,201 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
 ```
 
 - It's probably worth exploring `ApiErrorWriter` the `ApiErrorResponse` DTO and the `GlobalExceptionHandler` to see how I've made my error responses uniform and informative
-</hr>
+
+---
+
 - There's a couple of gotchas in the `JWTAuthenticationFilter` worth elaborating on
 
 ```java
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        try {
+            String token = extractToken(request);
+            if (token != null) {
+                Claims claims = jwtService.parseToken(token);
 
+                @SuppressWarnings("unchecked")
+                List<String> roleNames = (List<String>) claims.get("roles", List.class);
+
+                var roles = roleNames.stream()
+                        .map(roleName -> (GrantedAuthority) () -> "ROLE_" + roleName)
+                        .toList();
+
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(claims.getSubject(),
+                        null, roles);
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
+            filterChain.doFilter(request, response);
+            return;
+        } catch (JwtException e) {
+            SecurityContextHolder.clearContext();
+        } catch (Exception e) {
+            throw new ServletException("Failed to process JWT authentication", e);
+        }
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if (cookie.getName().equals("jwt")) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+}
+```
+
+- You will really want to throw some kind of error in the catch `JwtException` block. Don't do it - this will get swallowed and you'll end up with a 500
+-
+
+```java
+auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+```
+
+does some really heavy lifting. Without this you'll get weird 401 errors with malformed requests (missing body on a POST is a very common one)
+
+---
+
+- Spring Security comes with a built in @PreAuthorize annotation as well as an `@AllowedRoles` annotation that you can enable with additional configuration. But they both have a somewhat awkward syntax so I created my own `@RequireRoles` annotation. It is a bit of a pain because to set up the interceptor:
+
+```java
+@Component
+public class RequireRolesInterceptor implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request,
+            HttpServletResponse response, Object handler) throws Exception {
+        RequireRoles requireRoles = null;
+        if (!(handler instanceof HandlerMethod handlerMethod)) {
+            return true;
+        } else {
+            requireRoles = handlerMethod.getMethodAnnotation(RequireRoles.class);
+
+        }
+        if (requireRoles != null) {
+            checkRoles(requireRoles.value());
+        }
+        return true;
+    }
+
+    private void checkRoles(String[] requiredRoles) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new InsufficientAuthenticationException("Authentication Required");
+        }
+        Set<String> authRoles = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+        boolean allowed = Arrays.stream(requiredRoles).anyMatch(r -> authRoles.contains("ROLE_" + r));
+        if (!allowed) {
+            throw new AccessDeniedException("User does not have required role");
+        }
+    }
+
+}
+```
+
+You need to register it in WebConfig
+
+```java
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+    private static final String API_PREFIX = "/api/v1";
+    private final RequireRolesInterceptor requireRolesInterceptor;
+
+    public WebConfig(RequireRolesInterceptor requireRolesInterceptor) {
+        this.requireRolesInterceptor = requireRolesInterceptor;
+    }
+
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.addPathPrefix(API_PREFIX, c -> !c.getPackageName().startsWith("org.springdoc"));
+
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(requireRolesInterceptor)
+                .addPathPatterns(API_PREFIX + "/**");
+    }
+}
+```
+
+#### Service Level authentication/authorization
+
+Because the microservices will not be exposed externally - and due to not wanting to drown in auth complexity - I have chosen not to use Service tokens and instead extract the userId and roles from the JWT at the api gateway layer and pass them along as metadata headers to the individual services. This allows me to easily manually test GRPC requests and responses with `Postman` while in development.
+
+### Testing
+
+#### E2E
+
+End to end testing of the API will use `PlayWright` over `RestAssured` because of the nature of the one db per microservice pattern we don't get as much benefit from running against an in memory database and I would prefer an as realistic as possible test of the whole system.
+
+#### Unit
+
+Business logic within the API gateway and microservices will use JUnit5 and Mockito to ensure all edge cases are thoroughly tested
+
+### Shared code
+
+#### Protobufs
+
+All `.proto` files live in `/proto` - while in a real project it would make more sense for this to be a version controlled repository/package this works reasonably well for this project. The `pom.xml` in each service reads from the shared path in the IDE and will compile the stubs on any file change. The dockerfiles copy the proto directory in the build stage, before compiling to a single executable jar. This is faciliated by the excellent `org.xolstice` `protobuf-maven-plugin`. The following code takes care of compilation in both environments
+
+```xml
+			<plugin>
+				<groupId>org.xolstice.maven.plugins</groupId>
+				<artifactId>protobuf-maven-plugin</artifactId>
+				<version>0.6.1</version>
+				<configuration>
+					<protocArtifact>
+						com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}
+					</protocArtifact>
+					<pluginId>grpc-java</pluginId>
+					<pluginArtifact>
+						io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
+					</pluginArtifact>
+					<pluginParameter>useJakartaAnnotations=true</pluginParameter>
+					<protoSourceRoot>${proto.dir}</protoSourceRoot>
+				</configuration>
+				<executions>
+					<execution>
+						<id>compile</id>
+						<goals>
+							<goal>compile</goal>
+							<goal>compile-custom</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<!-- IDE profile -->
+		<profile>
+			<id>ide</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<proto.dir>${project.basedir}/../proto</proto.dir>
+			</properties>
+		</profile>
+
+		<!-- Docker profile -->
+		<profile>
+			<id>docker</id>
+			<properties>
+				<proto.dir>${project.basedir}/proto</proto.dir>
+			</properties>
+		</profile>
+	</profiles>
 ```
