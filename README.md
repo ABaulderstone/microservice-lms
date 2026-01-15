@@ -231,7 +231,7 @@ End to end testing of the API will use `PlayWright` over `RestAssured` because o
 
 #### Unit
 
-Business logic within the API gateway and microservices will use JUnit5 and Mockito to ensure all edge cases are thoroughly tested
+Business logic within the API gateway and microservices will use `JUnit` and `Mockito` to ensure all edge cases are thoroughly tested
 
 ### Shared code
 
