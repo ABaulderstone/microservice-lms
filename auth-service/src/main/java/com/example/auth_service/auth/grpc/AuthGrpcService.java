@@ -3,8 +3,6 @@ package com.example.auth_service.auth.grpc;
 import com.example.auth.proto.v1.AuthServiceGrpc;
 import com.example.auth.proto.v1.LoginRequest;
 import com.example.auth.proto.v1.LoginResponse;
-import com.example.auth.proto.v1.ValidateTokenRequest;
-import com.example.auth.proto.v1.ValidateTokenResponse;
 import com.example.auth_service.auth.JwtService;
 import com.example.auth_service.auth.PasswordEncodingService;
 import com.example.auth_service.user.UserService;

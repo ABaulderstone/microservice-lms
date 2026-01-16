@@ -120,6 +120,7 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
             return;
         } catch (JwtException e) {
             SecurityContextHolder.clearContext();
+            throw new InsufficientAuthenticationException("Authentication Required");
         } catch (Exception e) {
             throw new ServletException("Failed to process JWT authentication", e);
         }
@@ -143,8 +144,7 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
 }
 ```
 
-- You will really want to throw some kind of error in the catch `JwtException` block. Don't do it - this will get swallowed and you'll end up with a 500
--
+- Make sure to clear security context on JWT error
 
 ```java
 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -231,7 +231,7 @@ End to end testing of the API will use `PlayWright` over `RestAssured` because o
 
 #### Unit
 
-Business logic within the API gateway and microservices will use JUnit5 and Mockito to ensure all edge cases are thoroughly tested
+Business logic within the API gateway and microservices will use `JUnit` and `Mockito` to ensure all edge cases are thoroughly tested
 
 ### Shared code
 
