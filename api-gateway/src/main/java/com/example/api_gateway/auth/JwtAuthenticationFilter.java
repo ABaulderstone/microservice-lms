@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.checkerframework.checker.units.qual.C;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -55,6 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         } catch (JwtException e) {
             SecurityContextHolder.clearContext();
+            throw new InsufficientAuthenticationException("JWT ERROR: " + e.getMessage());
         } catch (Exception e) {
             throw new ServletException("Failed to process JWT authentication", e);
         }
