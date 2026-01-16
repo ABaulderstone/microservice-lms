@@ -141,7 +141,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<proto.dir>${project.basedir}/../proto</proto.dir>
+				<proto.dir>${project.basedir}/../proto/grpc</proto.dir>
 			</properties>
 		</profile>
 
@@ -149,7 +149,7 @@
 		<profile>
 			<id>docker</id>
 			<properties>
-				<proto.dir>${project.basedir}/proto</proto.dir>
+				<proto.dir>${project.basedir}/proto/grpc</proto.dir>
 			</properties>
 		</profile>
 	</profiles>
