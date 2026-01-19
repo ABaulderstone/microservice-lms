@@ -38,7 +38,7 @@ public class UserSeeder implements CommandLineRunner {
             for (var roleName : Role.RoleName.values()) {
                 var email = roleName.name().toLowerCase() + "@test.com";
                 var password = "password";
-                var roles = Set.of(roleRepository.findByName(roleName).get());
+                var roles = Set.of(roleName);
                 userService.createUser(email, password, roles);
             }
         }

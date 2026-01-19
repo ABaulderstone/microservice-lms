@@ -12,6 +12,13 @@
 	</parent>
 
 	<groupId>com.example</groupId>
+
+	<repositories>
+		<repository>
+			<id>confluent</id>
+			<url>https://packages.confluent.io/maven/</url>
+		</repository>
+	</repositories>
 	<artifactId>auth-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
@@ -52,6 +59,20 @@
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
+		</dependency>
+
+		<!-- Protobuf runtime -->
+		<!-- <dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>4.33.4</version>
+		</dependency> -->
+
+		<!-- Protobuf Kafka serializer -->
+		<dependency>
+			<groupId>io.confluent</groupId>
+			<artifactId>kafka-protobuf-serializer</artifactId>
+			<version>8.1.1</version>
 		</dependency>
 
 		<!-- gRPC -->
@@ -143,15 +164,9 @@
 						io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
 					</pluginArtifact>
 
-					<!-- gRPC protos -->
-					<protoSourceRoot>${proto.dir}/grpc</protoSourceRoot>
 
-					<!-- Event protos -->
-					<additionalProtoPathElements>
-						<additionalProtoPathElement>
-							${proto.dir}/events
-						</additionalProtoPathElement>
-					</additionalProtoPathElements>
+					<protoSourceRoot>${proto.dir}</protoSourceRoot>
+
 
 					<pluginParameter>useJakartaAnnotations=true</pluginParameter>
 				</configuration>
@@ -177,7 +192,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<proto.dir>${project.basedir}/../proto/grpc</proto.dir>
+				<proto.dir>${project.basedir}/../proto</proto.dir>
 			</properties>
 		</profile>
 
@@ -185,7 +200,7 @@
 		<profile>
 			<id>docker</id>
 			<properties>
-				<proto.dir>${project.basedir}/proto/grpc</proto.dir>
+				<proto.dir>${project.basedir}/proto</proto.dir>
 			</properties>
 		</profile>
 	</profiles>

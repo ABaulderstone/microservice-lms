@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package events.user.v1;
+option java_package = "com.example.events.user.v1";
+option java_outer_classname = "UserCreatedEvent";
+
+message UserCreated {
+    int64 user_id = 1; 
+    int64 occurred_at = 2;
+}
+
+

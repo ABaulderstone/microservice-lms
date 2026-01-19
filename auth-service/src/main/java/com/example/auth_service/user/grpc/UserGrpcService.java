@@ -54,23 +54,11 @@ public class UserGrpcService extends UserServiceGrpc.UserServiceImplBase {
         String email = request.getEmail();
         String password = "password123"; // Default password, should be changed later
         var roles = request.getRolesList(); // Assuming roles are sent as a list of strings
-        Set<Role> roleSet = roles.stream()
-                .map(roleName -> {
-                    try {
-                        return Role.RoleName.valueOf(roleName);
-                    } catch (IllegalArgumentException e) {
-                        return null;
-                    }
-                })
-                .filter(roleName -> roleName != null)
-                .map(roleName -> {
-                    var role = new Role();
-                    role.setName(roleName);
-                    return role;
-                })
+        Set<Role.RoleName> roleNames = roles.stream()
+                .map(Role.RoleName::valueOf)
                 .collect(Collectors.toSet());
 
-        User newUser = userService.createUser(email, password, roleSet);
+        User newUser = userService.createUser(email, password, roleNames);
 
         UserResponse response = UserResponse.newBuilder()
                 .setId(newUser.getId())
