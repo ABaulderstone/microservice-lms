@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: profile-service
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: profile-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
