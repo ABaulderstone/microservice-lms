@@ -69,11 +69,11 @@
 		</dependency> -->
 
 		<!-- Protobuf Kafka serializer -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>io.confluent</groupId>
 			<artifactId>kafka-protobuf-serializer</artifactId>
 			<version>8.1.1</version>
-		</dependency>
+		</dependency> -->
 
 		<!-- gRPC -->
 		<dependency>
