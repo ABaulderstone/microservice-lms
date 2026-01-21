@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package auth.v1;
+
+option java_multiple_files = true;
+option java_package = "com.example.profile.proto.v1";
+option java_outer_classname = "ProfileProto";
+
+service ProfileService {
+   rpc FindProfile (ProfileRequest) returns (ProfileResponse);
+}
+message ProfileRequest {
+   int64 user_id = 1;
+}
+message ProfileResponse {
+   int64 user_id = 1;
+   string first_name = 2;
+   string last_name = 3;
+}
