@@ -34,14 +34,19 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
 
-      # REQUIRED for KRaft
       KAFKA_CLUSTER_ID: q1Sh-9_ISia_zwGINzRvyQ
 
+      # Add these to help with topic creation
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
     healthcheck:
-      test: ['CMD-SHELL', 'nc -z localhost 9092']
+      test: ['CMD-SHELL', 'nc -z localhost 9092 && nc -z localhost 9093']
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 40s # Give it more time to fully start
 
   kafka-ui:
     image: provectuslabs/kafka-ui

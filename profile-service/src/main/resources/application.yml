@@ -8,3 +8,8 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
       value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+
+# logging:
+#   level:
+#     org.apache.kafka: DEBUG
+#     org.springframework.kafka: DEBUG

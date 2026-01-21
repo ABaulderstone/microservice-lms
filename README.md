@@ -294,15 +294,42 @@ All `.proto` files live in `/proto` - while in a real project it would make more
 
 ### Kcat
 
-```bash
-docker run --rm -it --network microservice-lms_default edenhill/kcat:1.7.1 kcat -b kafka:9092 -t user.created.v1 -C -f 'key=%k | value=%s\n'
-```
+````bash
+docker run --rm -it --network microservice-lms_default edenhill/kcat:1.7.1 kcat -f 'key=%k | value=%S\n'
+
 
 then
 
 ```bash
 kcat -b kafka:9092 -t user.created.v1 -C -f 'key=%k | value=%s\n'
 
+````
+
+docker run --rm -it \
+ --network <compose_network> \
+ edenhill/kcat:1.7.1 \
+ -b kafka:9092 \
+ -t user.created.v1 \
+ -C \
+ -K: \
+ -f 'key=%k | key_len=%K | value_len=%S\n'
+
 ```
 
+```
+
+docker exec -it kafka /bin/sh
+kafka-consumer-groups.sh \
+ --bootstrap-server kafka:9092 \
+ --describe \
+ --group profile-service
+
+```
 ### DB access
+```
+
+docker exec -it postgres psql -U postgres -d profile_db
+
+```
+
+```
