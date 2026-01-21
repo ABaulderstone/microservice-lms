@@ -289,3 +289,20 @@ All `.proto` files live in `/proto` - while in a real project it would make more
 		</profile>
 	</profiles>
 ```
+
+## Debugging
+
+### Kcat
+
+```bash
+docker run --rm -it --network microservice-lms_default edenhill/kcat:1.7.1 kcat -b kafka:9092 -t user.created.v1 -C -f 'key=%k | value=%s\n'
+```
+
+then
+
+```bash
+kcat -b kafka:9092 -t user.created.v1 -C -f 'key=%k | value=%s\n'
+
+```
+
+### DB access

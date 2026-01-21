@@ -1,5 +1,6 @@
 package com.example.profile_service.listeners;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -15,17 +16,22 @@ public class UserEventListener {
 
     public UserEventListener(ProfileService profileService) {
         this.profileService = profileService;
+        System.out.println("UserEventListener initialized");
     }
 
     @KafkaListener(topics = "user.created.v1", groupId = "profile-service")
+    public void onUserCreated(ConsumerRecord<Long, byte[]> record) {
+        Long userId = record.key();
+        byte[] data = record.value();
 
-    public void onUserCreated(@Header(KafkaHeaders.RECEIVED_KEY) Long userId, byte[] data) {
+        System.out.println("Received event for userId=" + userId);
+
         try {
             UserCreatedEvent.UserCreated event = UserCreatedEvent.UserCreated.parseFrom(data);
-            System.out.println("Received UserCreatedEvent for userId: " + event.getUserId());
+            System.out.println("Processing UserCreatedEvent for userId: " + event.getUserId());
             profileService.createProfileIfNotExists(userId);
         } catch (InvalidProtocolBufferException e) {
-            throw new RuntimeException("Failed to parse user created event", e);
+            throw new RuntimeException(e);
         }
     }
 }

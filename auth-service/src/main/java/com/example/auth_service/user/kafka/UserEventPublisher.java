@@ -1,10 +1,13 @@
 
 package com.example.auth_service.user.kafka;
 
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import com.example.events.user.v1.UserCreatedEvent;
+
+import jakarta.annotation.PostConstruct;
 
 @Component
 public class UserEventPublisher {
@@ -21,10 +24,22 @@ public class UserEventPublisher {
                 .setUserId(userId)
                 .setOccurredAt(System.currentTimeMillis())
                 .build();
+        System.out.println("Publishing UserCreatedEvent for userId: " + userId);
+        System.out.println(kafkaTemplate);
 
         kafkaTemplate.send(
                 "user.created.v1",
                 userId,
                 event.toByteArray());
     }
+
+    @PostConstruct
+    public void debugKafkaProducer() {
+        if (kafkaTemplate.getProducerFactory() instanceof DefaultKafkaProducerFactory<?, ?> pf) {
+            System.out.println("Kafka producer config:");
+            pf.getConfigurationProperties()
+                    .forEach((k, v) -> System.out.println(k + " = " + v));
+        }
+    }
+
 }

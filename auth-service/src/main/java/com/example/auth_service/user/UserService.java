@@ -42,6 +42,7 @@ public class UserService {
         newUser.setPassword(hashedPassword);
         newUser.setRoles(roles);
         User saved = userRepository.save(newUser);
+        System.out.println("User created with ID: " + saved.getId());
         userEventPublisher.publishUserCreatedEvent(saved.getId());
         return saved;
     }
