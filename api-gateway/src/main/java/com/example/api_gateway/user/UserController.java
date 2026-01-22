@@ -5,10 +5,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.api_gateway.auth.RequireRoles;
+import com.example.api_gateway.common.exceptions.ServiceException;
 import com.example.api_gateway.user.dtos.CreateUserDto;
 import com.example.api_gateway.user.dtos.UserResponseDto;
 import com.example.user.proto.v1.UserResponse;
+import com.google.api.Service;
 
+import io.grpc.StatusRuntimeException;
 import jakarta.validation.Valid;
 
 import org.checkerframework.checker.units.qual.C;
@@ -41,9 +44,18 @@ public class UserController {
     @RequireRoles({ "ADMIN" })
     @PostMapping()
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody CreateUserDto data) {
-        UserResponse createdUserResp = userGatewayService.createUser(data);
-        UserResponseDto entity = UserResponseDto.fromProto(createdUserResp);
-        return ResponseEntity.status(HttpStatus.CREATED).body(entity);
+        try {
+            UserResponse createdUserResp = userGatewayService.createUser(data);
+            UserResponseDto entity = UserResponseDto.fromProto(createdUserResp);
+            return ResponseEntity.status(HttpStatus.CREATED).body(entity);
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == io.grpc.Status.Code.ALREADY_EXISTS) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, e.getStatus().getDescription());
+            }
+            if (e.getStatus().getCode() == io.grpc.Status.Code.NOT_FOUND) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getStatus().getDescription());
+            }
+            throw new ServiceException(e);
+        }
     }
-
 }

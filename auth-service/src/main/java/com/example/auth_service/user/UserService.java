@@ -2,10 +2,13 @@ package com.example.auth_service.user;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.example.auth_service.auth.PasswordEncodingService;
+import com.example.auth_service.common.exceptions.RolesNotFoundException;
+import com.example.auth_service.common.exceptions.UserAlreadyExistsException;
 import com.example.auth_service.user.entities.Role;
 import com.example.auth_service.user.entities.User;
 import com.example.auth_service.user.entities.Role.RoleName;
@@ -30,12 +33,19 @@ public class UserService {
     }
 
     public User createUser(String email, String rawPassword, Set<RoleName> roleNames) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new UserAlreadyExistsException(email);
+        }
+
         String hashedPassword = passwordEncodingService.hashPassword(rawPassword);
         User newUser = new User();
         Set<Role> roles = roleRepository.findByNameIn(roleNames);
 
         if (roles.size() != roleNames.size()) {
-            throw new IllegalStateException("Some roles not found");
+            Set<RoleName> foundRoleNames = roles.stream()
+                    .map(Role::getName)
+                    .collect(Collectors.toSet());
+            throw new RolesNotFoundException(roleNames, foundRoleNames);
         }
 
         newUser.setEmail(email);

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.api_gateway.common.dtos.ApiErrorResponse;
+import com.example.api_gateway.common.exceptions.ServiceException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -21,58 +22,73 @@ import jakarta.validation.ConstraintViolationException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ApiErrorResponse> handleResponseStatusException(ResponseStatusException ex,
-            HttpServletRequest request) {
-        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
-        ApiErrorResponse errorResponse = ApiErrorResponse.of(
-                status,
-                ex.getReason(),
-                request.getRequestURI());
-        return new ResponseEntity<>(errorResponse, status);
-    }
+        @ExceptionHandler(ResponseStatusException.class)
+        public ResponseEntity<ApiErrorResponse> handleResponseStatusException(ResponseStatusException ex,
+                        HttpServletRequest request) {
+                HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
+                ApiErrorResponse errorResponse = ApiErrorResponse.of(
+                                status,
+                                ex.getReason(),
+                                request.getRequestURI());
+                return new ResponseEntity<>(errorResponse, status);
+        }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            HttpServletRequest request) {
-        Map<String, List<String>> errors = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .collect(Collectors.groupingBy(
-                        FieldError::getField,
-                        Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())));
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValid(
+                        MethodArgumentNotValidException ex,
+                        HttpServletRequest request) {
+                Map<String, List<String>> errors = ex.getBindingResult()
+                                .getFieldErrors()
+                                .stream()
+                                .collect(Collectors.groupingBy(
+                                                FieldError::getField,
+                                                Collectors.mapping(FieldError::getDefaultMessage,
+                                                                Collectors.toList())));
 
-        HttpStatus status = HttpStatus.BAD_REQUEST;
+                HttpStatus status = HttpStatus.BAD_REQUEST;
 
-        return ResponseEntity
-                .status(status)
-                .body(ApiErrorResponse.of(
-                        status,
-                        "Validation failed",
-                        request.getRequestURI(),
-                        errors));
-    }
+                return ResponseEntity
+                                .status(status)
+                                .body(ApiErrorResponse.of(
+                                                status,
+                                                "Validation failed",
+                                                request.getRequestURI(),
+                                                errors));
+        }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiErrorResponse> handleConstraintViolation(
-            ConstraintViolationException ex,
-            HttpServletRequest request) {
-        Map<String, List<String>> errors = ex.getConstraintViolations()
-                .stream()
-                .collect(Collectors.groupingBy(
-                        v -> v.getPropertyPath().toString(),
-                        Collectors.mapping(ConstraintViolation::getMessage, Collectors.toList())));
+        @ExceptionHandler(ConstraintViolationException.class)
+        public ResponseEntity<ApiErrorResponse> handleConstraintViolation(
+                        ConstraintViolationException ex,
+                        HttpServletRequest request) {
+                Map<String, List<String>> errors = ex.getConstraintViolations()
+                                .stream()
+                                .collect(Collectors.groupingBy(
+                                                v -> v.getPropertyPath().toString(),
+                                                Collectors.mapping(ConstraintViolation::getMessage,
+                                                                Collectors.toList())));
 
-        HttpStatus status = HttpStatus.BAD_REQUEST;
+                HttpStatus status = HttpStatus.BAD_REQUEST;
 
-        return ResponseEntity
-                .status(status)
-                .body(ApiErrorResponse.of(
-                        status,
-                        "Validation failed",
-                        request.getRequestURI(),
-                        errors));
-    }
+                return ResponseEntity
+                                .status(status)
+                                .body(ApiErrorResponse.of(
+                                                status,
+                                                "Validation failed",
+                                                request.getRequestURI(),
+                                                errors));
+        }
+
+        @ExceptionHandler(ServiceException.class)
+        public ResponseEntity<ApiErrorResponse> handleServiceException(
+                        ServiceException ex,
+                        HttpServletRequest request) {
+                HttpStatus status = ex.getHttpStatus();
+                ApiErrorResponse errorResponse = ApiErrorResponse.of(
+                                status,
+                                ex.getMessage(),
+                                request.getRequestURI(),
+                                ex.getErrors());
+                return new ResponseEntity<>(errorResponse, status);
+        }
 
 }
