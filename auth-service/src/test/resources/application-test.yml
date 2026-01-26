@@ -1,0 +1,13 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+grpc:
+  server:
+    port: 0 # random free port
+
+  client:
+    test:
+      address: static://localhost:${grpc.server.port}
+      negotiationType: plaintext
