@@ -333,3 +333,18 @@ docker exec -it postgres psql -U postgres -d profile_db
 ```
 
 ```
+
+### Test Runs
+
+```bash
+# Unit tests only (fast, no Docker)
+mvn test
+
+# Integration tests only (with TestContainers)
+mvn test -P integration
+
+# All tests (unit + integration)
+mvn test -P all-tests
+# OR
+mvn verify
+```
